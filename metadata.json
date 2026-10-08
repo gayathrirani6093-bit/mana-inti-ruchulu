@@ -1,0 +1,6 @@
+{
+  "name": "Mana Inti Ruchulu",
+  "description": "Inti Ruchi • Fresh Meals • Affordable • Delivered. Authentic homemade meals delivered straight to your doorstep.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

@@ -1,0 +1,35 @@
+{
+  "entities": {
+    "LiveLocation": {
+      "title": "LiveLocation",
+      "description": "Real-time live location coordinates of users (riders/customers)",
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "description": "The ID of the user sharing location"
+        },
+        "latitude": {
+          "type": "number",
+          "description": "The latitude coordinate of the device"
+        },
+        "longitude": {
+          "type": "number",
+          "description": "The longitude coordinate of the device"
+        },
+        "timestamp": {
+          "type": "string",
+          "format": "date-time",
+          "description": "ISO 8601 timestamp representing when the location was recorded"
+        }
+      },
+      "required": ["userId", "latitude", "longitude", "timestamp"]
+    }
+  },
+  "firestore": {
+    "/locations/{userId}": {
+      "schema": "LiveLocation",
+      "description": "Live GPS coordinates tracking for users"
+    }
+  }
+}

@@ -1,0 +1,57 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // 1. Global Safety Net
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Helper functions
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    // Validation helper
+    function isValidLocation(data) {
+      return data.keys().hasAll(['userId', 'latitude', 'longitude', 'timestamp'])
+        && data.keys().hasOnly(['userId', 'latitude', 'longitude', 'timestamp'])
+        && data.userId is string 
+        && data.userId.size() <= 128
+        && data.latitude is number
+        && data.latitude >= -90.0
+        && data.latitude <= 90.0
+        && data.longitude is number
+        && data.longitude >= -180.0
+        && data.longitude <= 180.0
+        && data.timestamp is string
+        && data.timestamp.size() <= 64;
+    }
+
+    match /locations/{userId} {
+      // Secure read: Anyone authenticated can read real-time coordinate updates
+      allow get, list: if isSignedIn();
+      
+      // Secure write: Only the owner of the document can create/update it, and must follow shape constraints
+      allow create: if isOwner(userId)
+        && isValidId(userId)
+        && isValidLocation(request.resource.data)
+        && request.resource.data.userId == request.auth.uid;
+        
+      allow update: if isOwner(userId)
+        && isValidId(userId)
+        && isValidLocation(request.resource.data)
+        && request.resource.data.userId == request.auth.uid
+        && request.resource.data.userId == resource.data.userId;
+        
+      allow delete: if isOwner(userId);
+    }
+  }
+}
